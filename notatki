@@ -1,0 +1,37 @@
+Dziala w sqlite:
+SELECT (CASE WHEN (AGE > 10) THEN 1 ELSE 0 END) FROM demo 
+Jak zastąpić CASE w MSACCESS:
+SELECT
+   IIF(wyrazenie, wartosc_gdy_prawda, wartosc_gdy_falsz) AS NAZWA_KOLUMNY
+FROM
+   NAZWA_TABELI
+
+https://support.office.com/en-us/article/switch-function-d750c10d-0c8e-444c-9e63-f47504f9e379
+Przyklady ze switch z stackoverflow.com/questions/15774078/what-is-the-equivalent-of-select-case-in-access-sql
+select switch(
+  age > 40, 4,
+  age > 25, 3,
+  age > 20, 2,
+  age > 10, 1,
+  true, 0
+) from demo
+
+SELECT
+    Switch(
+        OpeningBalance < 5001, 20,
+        OpeningBalance < 10001, 30,
+        OpeningBalance < 20001, 40,
+        OpeningBalance >= 20001, 50
+        ) AS commission
+FROM YourTable;
+
+UPDATE YourTable
+SET commission =
+    Switch(
+        OpeningBalance < 5001, 20,
+        OpeningBalance < 10001, 30,
+        OpeningBalance < 20001, 40,
+        OpeningBalance >= 20001, 50
+        );
+
+
