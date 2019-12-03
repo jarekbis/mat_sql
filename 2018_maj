@@ -1,0 +1,38 @@
+sqlite> .mode csv
+sqlite> .separator "\t"
+sqlite> .import naprawy.txt naprawy
+sqlite> .import komputery.txt komputery
+sqlite> .import awarie.txt awarie
+
+sqlite> SELECT Pojemnosc_dysku, count(Pojemnosc_dysku) AS Liczba
+ ...>  FROM komputery
+ ...>  GROUP BY Pojemnosc_dysku
+ ...>  ORDER BY Liczba DESC
+ ...>  LIMIT 10;
+
+sqlite> SELECT komputery.numer_komputera, count(awarie.numer_zgloszenia) as ileawarii
+ ...> FROM awarie
+ ...> NATURAL JOIN komputery
+ ...> NATURAL JOIN naprawy
+ ...> WHERE komputery.sekcja = 'A' AND naprawy.rodzaj='wymiana'
+ ...> GROUP BY Komputery.numer_komputera
+ ...> HAVING ileawarii >= 10;
+
+sqlite> SELECT date(awarie.czas_awarii), komputery.sekcja
+ ...> FROM awarie INNER JOIN komputery ON awarie.Numer_komputera=komputery.Numer_komputera
+ ...> GROUP BY DATE(awarie.czas_awarii), komputery.sekcja
+ ...> HAVING (komputery.sekcja, count(awarie.Numer_komputera) IN (SELECT sekcja, count(Numer_komputera) FROM komputery
+ ...> GROUP BY sekcja);
+
+sqlite> SELECT awarie.numer_zgloszenia, awarie.czas_awarii, naprawy.czas_naprawy, 
+          max(strftime('%s',naprawy.czas_naprawy)-strftime('%s',awarie.czas_awarii))
+ ...> FROM awarie INNER JOIN naprawy ON naprawy.numer_zgloszenia = awarie.numer_zgloszenia
+ ...> GROUP BY awarie.numer_zgloszenia
+ ...> ORDER BY 4 DESC
+ ...> LIMIT 1;
+
+sqlite> SELECT count(*) 
+ ...> FROM (SELECT komputery.numer_komputera 
+ ...>   FROM komputery LEFT JOIN awarie ON awarie.numer_komputera = komputery.numer_komputera 
+ ...>   GROUP BY komputery.numer_komputera 
+ ...>   HAVING max(CAST(priorytet AS INTEGER )) < 8 OR priorytet IS NULL);
