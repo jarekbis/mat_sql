@@ -4,30 +4,63 @@ sqlite> .import perfumy.txt perfumy
 sqlite> .import sklad.txt sklad
 sqlite> .import marki.txt marki
 
-sqlite> SELECT perfumy.nazwa_p FROM perfumy
-   ...> JOIN sklad ON perfumy.id_perfum = sklad.id_perfum
-   ...> WHERE sklad.nazwa_skladnika = 'absolut jasminu' ;
+-- 6.1 
+SELECT perfumy.nazwa_p FROM perfumy
+JOIN sklad ON perfumy.id_perfum = sklad.id_perfum
+WHERE sklad.nazwa_skladnika = 'absolut jasminu' ;
+-- lub
+SELECT p.nazwa_p FROM perfumy p
+JOIN sklad s USING(id_perfum)
+WHERE s.nazwa_skladnika = 'absolut jasminu';
 
-sqlite> SELECT perfumy.rodzina_zapachow, perfumy.cena, marki.nazwa_m
-   ...> FROM perfumy
-   ...> JOIN marki ON perfumy.id_marki = marki.id_marki
-   ...> GROUP BY perfumy.rodzina_zapachow
-   ...> HAVING MIN(perfumy.cena) = perfumy.cena ;
+-- 6.2
+SELECT perfumy.rodzina_zapachow, perfumy.cena, marki.nazwa_m
+FROM perfumy
+JOIN marki ON perfumy.id_marki = marki.id_marki
+GROUP BY perfumy.rodzina_zapachow
+HAVING MIN(perfumy.cena) = perfumy.cena ;
+-- lub
+SELECT p.rodzina_zapachow, p.cena, m.nazwa_m
+FROM perfumy p
+JOIN marki m USING(id_marki)
+GROUP BY p.rodzina_zapachow
+HAVING MIN(p.cena) = p.cena ;
 
-sqlite> SELECT marki.nazwa_m
-   ...> FROM perfumy
-   ...> JOIN sklad ON sklad.id_perfum = perfumy.id_perfum
-   ...> JOIN marki ON perfumy.id_marki = marki.id_marki
-   ...> GROUP BY marki.nazwa_m
-   ...> HAVING MAX(CASE WHEN sklad.nazwa_skladnika LIKE '%paczula%' THEN 1 ELSE 0 END) = 0
-   ...> ORDER BY marki.nazwa_m;
+-- 6.3
+SELECT marki.nazwa_m
+FROM perfumy
+JOIN sklad ON sklad.id_perfum = perfumy.id_perfum
+JOIN marki ON perfumy.id_marki = marki.id_marki
+GROUP BY marki.nazwa_m
+HAVING MAX(CASE WHEN sklad.nazwa_skladnika LIKE '%paczula%' THEN 1 ELSE 0 END) = 0
+ORDER BY marki.nazwa_m;
+-- lub
+SELECT m.nazwa_m
+FROM perfumy p
+JOIN sklad s USING(id_perfum)
+JOIN marki m USING(id_marki)
+GROUP BY m.nazwa_m
+HAVING MAX(CASE WHEN s.nazwa_skladnika LIKE '%paczula%' THEN 1 ELSE 0 END) = 0
+ORDER BY m.nazwa_m;
 
-sqlite> SELECT perfumy.nazwa_p, 0.85 * perfumy.cena FROM perfumy
-   ...> JOIN marki ON perfumy.id_marki = marki.id_marki
-   ...> WHERE marki.nazwa_m = 'Mou De Rosine' AND perfumy.rodzina_zapachow = 'orientalno-drzewna' ;
+-- 6.4
+SELECT perfumy.nazwa_p, 0.85 * perfumy.cena FROM perfumy
+JOIN marki ON perfumy.id_marki = marki.id_marki
+WHERE marki.nazwa_m = 'Mou De Rosine' AND perfumy.rodzina_zapachow = 'orientalno-drzewna' ;
+-- lub
+SELECT p.nazwa_p, 0.85 * p.cena FROM perfumy p
+JOIN marki m USING(id_marki)
+WHERE m.nazwa_m = 'Mou De Rosine' AND p.rodzina_zapachow = 'orientalno-drzewna' ;
 
-sqlite> SELECT marki.nazwa_m, perfumy.rodzina_zapachow
-   ...> FROM perfumy
-   ...> JOIN marki ON perfumy.id_marki = marki.id_marki
-   ...> GROUP BY marki.nazwa_m
-   ...> HAVING COUNT(DISTINCT perfumy.rodzina_zapachow) = 1 ;
+-- 6.5
+SELECT marki.nazwa_m, perfumy.rodzina_zapachow
+FROM perfumy
+JOIN marki ON perfumy.id_marki = marki.id_marki
+GROUP BY marki.nazwa_m
+HAVING COUNT(DISTINCT perfumy.rodzina_zapachow) = 1 ;
+-- lub
+SELECT m.nazwa_m, p.rodzina_zapachow
+FROM perfumy p
+JOIN marki m USING(id_marki)
+GROUP BY m.nazwa_m
+HAVING COUNT(DISTINCT p.rodzina_zapachow) = 1 ;
