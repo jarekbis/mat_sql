@@ -1,0 +1,48 @@
+sqlite> .mode csv
+sqlite> .separator "\t"
+sqlite> .import wyniki.txt wyniki
+sqlite> .import sedziowie.txt sedziowie
+sqlite> .import druzyny.txt druzyny
+
+-- 5.1a
+SELECT rodzaj_meczu, count(*) 
+FROM wyniki w 
+JOIN druzyny d USING(id_druzyny) 
+WHERE d.miasto='Kucykowo' 
+GROUP BY rodzaj_meczu;
+-- 5.1b
+SELECT strftime("%Y",data_meczu) as rok, count(*) as mecze 
+FROM wyniki w 
+JOIN druzyny d USING(id_druzyny) 
+WHERE d.miasto='Kucykowo' 
+GROUP BY rok 
+ORDER BY mecze DESC 
+LIMIT 1;
+-- lub
+SELECT rok, MAX(mecze) 
+FROM (SELECT strftime("%Y",data_meczu) as rok, count(*) as mecze 
+ FROM wyniki w 
+ JOIN druzyny d USING(id_druzyny) 
+ WHERE d.miasto='Kucykowo' 
+ GROUP BY rok);
+
+-- 5.2
+SELECT d.nazwa 
+FROM wyniki w 
+JOIN druzyny d USING(id_druzyny) 
+GROUP BY id_druzyny 
+HAVING SUM(bramki_zdobyte) = SUM(bramki_stracone);
+
+-- 5.3
+SELECT (CASE WHEN bramki_zdobyte > bramki_stracone THEN "W" 
+             WHEN bramki_zdobyte < bramki_stracone THEN "P" 
+             ELSE "R" END) as wynik, 
+       count(*) 
+FROM wyniki 
+GROUP BY wynik ;
+
+-- 5.4
+SELECT count(*) 
+FROM sedziowie s 
+LEFT JOIN (SELECT nr_licencji FROM wyniki WHERE rodzaj_meczu='P' ) w USING(nr_licencji) 
+WHERE w.nr_licencji IS NULL;
