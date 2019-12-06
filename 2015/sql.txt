@@ -1,0 +1,38 @@
+sqlite> .cd 2015
+sqlite> .mode csv
+sqlite> .separator ";"
+sqlite> .import Kierowcy.txt kierowcy
+sqlite> .import Wyniki.txt wyniki
+sqlite> .import Wyscigi.txt wyscigi
+
+--6.1
+SELECT rok, grandprix, MAX(ile) 
+FROM (SELECT s.rok, s.grandprix, sum(n.punkty) AS ile 
+  FROM wyniki n 
+  JOIN kierowcy k USING(id_kierowcy) 
+  JOIN wyscigi s USING(id_wyscigu) 
+  where k.nazwisko = 'Kubica' AND k.imie = 'Robert' 
+  GROUP BY s.rok, s.grandprix);
+
+--6.2
+SELECT grandprix, min(ile) 
+FROM (SELECT grandprix, count(*) AS ile FROM wyscigi GROUP BY grandprix);
+
+--6.3
+SELECT nazwisko, imie, MAX(ile), rok 
+FROM (SELECT k.nazwisko, k.imie, SUM(n.punkty) as ile, rok 
+        FROM wyniki n 
+        JOIN kierowcy k USING(id_kierowcy) 
+        JOIN wyscigi s USING(id_wyscigu) 
+        WHERE rok IN (2000,2006,2012)
+        GROUP BY rok,k.nazwisko,k.imie) 
+GROUP BY rok;
+
+--6.4
+SELECT kraj, COUNT(*) 
+FROM (SELECT DISTINCT k.nazwisko, k.imie, k.kraj 
+      FROM wyniki n 
+      JOIN kierowcy k USING(id_kierowcy) 
+      JOIN wyscigi s USING(id_wyscigu) 
+      WHERE rok = 2012 AND n.punkty > 0)
+GROUP BY kraj;
