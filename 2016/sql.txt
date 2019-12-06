@@ -1,0 +1,44 @@
+sqlite> .cd 2016
+sqlite> .mode csv
+sqlite> .separator "\t"
+sqlite> .import meldunek.txt meldunek
+sqlite> .import studenci.txt studenci
+sqlite> .import wypozyczenia.txt wypozyczenia
+
+-- 5.1 a
+SELECT s.imie, s.nazwisko, max(w.ile) 
+FROM (SELECT pesel, COUNT(*) AS ile FROM wypozyczenia GROUP BY pesel ) w 
+JOIN studenci s USING(pesel);
+
+-- 5.1b
+SELECT w.tytul
+FROM wypozyczenia w
+WHERE pesel IN /* zamiast operatora IN tutaj mozna uzyc porownania = */
+(SELECT s.pesel FROM (SELECT pesel, COUNT(*) as ile FROM wypozyczenia GROUP BY pesel ) 
+ JOIN studenci s USING(pesel) 
+ ORDER BY ile DESC 
+ LIMIT 1;)
+
+-- 5.2 
+/* mnoze przez 1. bo inaczej arytmetyka liczb calkowitych, uzylem printf - moze jest inny sposob na sformatowanie liczby)
+SELECT printf("%.4f" , 1.* (SELECT count(*) FROM meldunek) / (SELECT count(DISTINCT id_pok) FROM meldunek));
+
+-- 5.3
+SELECT COUNT(*) FROM studenci WHERE substr(pesel,10,1) IN ('0','2','4','6','8') ;
+SELECT COUNT(*) FROM studenci WHERE substr(pesel,10,1) IN ('1','3','5','7','9') ;
+--lub
+SELECT (CASE WHEN substr(pesel,10,1) IN ('0','2','4','6','8') THEN "K" ELSE "M" END) as plec, count(*) 
+FROM studenci 
+GROUP BY plec;
+
+-- 5.4
+SELECT nazwisko, imie 
+FROM studenci 
+WHERE pesel NOT IN (SELECT pesel FROM meldunek) 
+ORDER BY nazwisko;
+
+-- 5.5
+/*tutaj moze byc blad, gdy wypozyczajacy spoza akademika maja ten sam tytul
+poszukaj innego zapytania*/
+SELECT COUNT() 
+FROM (SELECT DISTINCT m.id_pok, w.tytul from wypozyczenia w LEFT JOIN meldunek m USING(pesel));
