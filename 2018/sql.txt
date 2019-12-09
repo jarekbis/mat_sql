@@ -5,13 +5,20 @@ sqlite> .import komputery.txt komputery
 sqlite> .import awarie.txt awarie
 
 -- 6.1
+-- SQLITE
 SELECT Pojemnosc_dysku, count(Pojemnosc_dysku) AS Liczba
 FROM komputery
 GROUP BY Pojemnosc_dysku
 ORDER BY Liczba DESC
 LIMIT 10;
+-- MS ACCES
+SELECT TOP 10 Count(Numer_komputera) AS [Liczba komputerów], Pojemnosc_dysku
+FROM Komputery
+GROUP BY Pojemnosc_dysku
+ORDER BY Count(Numer_komputera) DESC;
 
 -- 6.2
+-- SQLITE
 SELECT komputery.numer_komputera, count(awarie.numer_zgloszenia) as ileawarii
 FROM awarie
 NATURAL JOIN komputery
@@ -27,6 +34,15 @@ JOIN naprawy n USING(Numer_zgloszenia)
 WHERE k.sekcja = 'A' AND n.rodzaj='wymiana'
 GROUP BY k.numer_komputera
 HAVING ileawarii >= 10;
+-- MS ACCESS
+SELECT Awarie.Numer_komputera, Count(Awarie.Numer_komputera) AS [Liczba awarii]
+FROM Komputery 
+INNER JOIN (Awarie 
+   INNER JOIN Naprawy ON Awarie.Numer_zgloszenia = Naprawy.Numer_zgloszenia) 
+ON Komputery.Numer_komputera = Awarie.Numer_komputera
+WHERE Komputery.Sekcja="A" AND Naprawy.Rodzaj="wymiana"
+GROUP BY Awarie.Numer_komputera
+HAVING Count(Awarie.Numer_komputera)>=10;
 
 -- 6.3
 SELECT date(awarie.czas_awarii), komputery.sekcja
@@ -39,6 +55,18 @@ FROM awarie a
 JOIN komputery k USING(Numer_komputera)
 GROUP BY DATE(a.czas_awarii), k.sekcja
 HAVING (k.sekcja, count(a.Numer_komputera)) IN (SELECT sekcja, count(Numer_komputera) FROM komputery GROUP BY sekcja);
+-- MS ACCESS
+SELECT a.s, a.data
+FROM (
+      SELECT komputery.sekcja AS s, FORMAT(awarie.czas_awarii,"yyyy-mm-dd") AS data, count(awarie.Numer_komputera) AS liczba_awarii 
+      FROM awarie 
+      INNER JOIN komputery ON awarie.Numer_komputera=komputery.Numer_komputera 
+      GROUP BY FORMAT(awarie.czas_awarii,"yyyy-mm-dd"), komputery.sekcja)  AS a 
+INNER JOIN (
+      SELECT komputery.sekcja AS s, count(komputery.Numer_komputera) AS liczba_komputerow 
+      FROM komputery 
+      GROUP BY komputery.sekcja)  AS b 
+ON (a.liczba_awarii = b.liczba_komputerow AND STRCOMP(a.s,b.s)=0); -- operator porownania = zle porownywal;strcomp zwraca 0 gdy rowne
 
 -- 6.4
 SELECT awarie.numer_zgloszenia, awarie.czas_awarii, naprawy.czas_naprawy, 
@@ -54,6 +82,17 @@ JOIN naprawy n USING(numer_zgloszenia)
 GROUP BY a.numer_zgloszenia
 ORDER BY 4 DESC
 LIMIT 1;
+-- MS ACCESS 
+SELECT awarie.numer_zgloszenia, min(awarie.czas_awarii) AS [data awarii], max(naprawy.czas_naprawy) AS [data naprawy]
+FROM (
+     awarie INNER JOIN (
+               SELECT TOP 1 awarie.numer_zgloszenia as nz, max(DateDiff("s", awarie.czas_awarii, naprawy.czas_naprawy)) 
+               FROM awarie INNER JOIN naprawy ON naprawy.numer_zgloszenia = awarie.numer_zgloszenia
+               GROUP BY awarie.numer_zgloszenia
+               ORDER BY 2 DESC)  AS a 
+     ON awarie.numer_zgloszenia=a.nz) 
+INNER JOIN naprawy ON naprawy.numer_zgloszenia=awarie.numer_zgloszenia
+GROUP BY awarie.numer_zgloszenia;
 
 -- 6.5
 SELECT count(*) 
@@ -62,3 +101,11 @@ FROM (SELECT numer_komputera
  LEFT JOIN awarie a USING(numer_komputera)
  GROUP BY numer_komputera 
  HAVING max(CAST(priorytet AS INTEGER )) < 8 OR priorytet IS NULL);
+-- MS ACCESS
+SELECT count(*) 
+FROM (
+      SELECT komputery.numer_komputera
+      FROM komputery
+      LEFT JOIN awarie ON komputery.numer_komputera = awarie.numer_komputera
+      GROUP BY komputery.numer_komputera 
+      HAVING max(priorytet) < 8 OR sum(priorytet) IS NULL);
