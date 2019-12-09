@@ -12,20 +12,22 @@ WHERE sklad.nazwa_skladnika = 'absolut jasminu' ;
 SELECT p.nazwa_p FROM perfumy p
 JOIN sklad s USING(id_perfum)
 WHERE s.nazwa_skladnika = 'absolut jasminu';
+-- MS ACCESS
+SELECT perfumy.nazwa_p FROM perfumy
+INNER JOIN sklad ON perfumy.id_perfum = sklad.id_perfum
+WHERE sklad.nazwa_skladnika = 'absolut jasminu' ;
 
 -- 6.2
-SELECT perfumy.rodzina_zapachow, perfumy.cena, marki.nazwa_m
+SELECT rodzina_zapachow, MIN(cena), nazwa_p
 FROM perfumy
-JOIN marki ON perfumy.id_marki = marki.id_marki
-GROUP BY perfumy.rodzina_zapachow
-HAVING MIN(perfumy.cena) = perfumy.cena ;
--- lub
-SELECT p.rodzina_zapachow, p.cena, m.nazwa_m
-FROM perfumy p
-JOIN marki m USING(id_marki)
-GROUP BY p.rodzina_zapachow
-HAVING MIN(p.cena) = p.cena ;
-
+GROUP BY rodzina_zapachow;
+-- MS ACCESS
+SELECT perfumy.rodzina_zapachow, perfumy.cena, perfumy.nazwa_p
+FROM perfumy 
+INNER JOIN (SELECT rodzina_zapachow, MIN(cena) as c
+FROM perfumy
+GROUP BY rodzina_zapachow) AS A
+ON perfumy.rodzina_zapachow = a.rodzina_zapachow AND a.c = perfumy.cena;
 -- 6.3
 SELECT marki.nazwa_m
 FROM perfumy
@@ -42,15 +44,27 @@ JOIN marki m USING(id_marki)
 GROUP BY m.nazwa_m
 HAVING MAX(CASE WHEN s.nazwa_skladnika LIKE '%paczula%' THEN 1 ELSE 0 END) = 0
 ORDER BY m.nazwa_m;
-
+-- MS ACCESS
+SELECT marki.nazwa_m
+FROM (perfumy
+    INNER JOIN sklad ON sklad.id_perfum = perfumy.id_perfum)
+INNER JOIN marki ON perfumy.id_marki = marki.id_marki
+GROUP BY marki.nazwa_m
+HAVING MAX( IIF (sklad.nazwa_skladnika LIKE "*paczula*",1,0)) = 0
+ORDER BY marki.nazwa_m;
 -- 6.4
-SELECT perfumy.nazwa_p, 0.85 * perfumy.cena FROM perfumy
+SELECT perfumy.nazwa_p, printf("%.2f", 0.85 * perfumy.cena) obn_cena FROM perfumy
 JOIN marki ON perfumy.id_marki = marki.id_marki
 WHERE marki.nazwa_m = 'Mou De Rosine' AND perfumy.rodzina_zapachow = 'orientalno-drzewna' ;
 -- lub
-SELECT p.nazwa_p, 0.85 * p.cena FROM perfumy p
+SELECT p.nazwa_p, printf("%.2f", 0.85 * p.cena) obn_cena FROM perfumy p
 JOIN marki m USING(id_marki)
 WHERE m.nazwa_m = 'Mou De Rosine' AND p.rodzina_zapachow = 'orientalno-drzewna' ;
+-- MS ACCESS
+SELECT perfumy.nazwa_p, FORMAT( 0.85 * perfumy.cena,"0.00")  
+FROM perfumy
+INNER JOIN marki ON perfumy.id_marki = marki.id_marki
+WHERE marki.nazwa_m = 'Mou De Rosine' AND perfumy.rodzina_zapachow = 'orientalno-drzewna' ;
 
 -- 6.5
 SELECT marki.nazwa_m, perfumy.rodzina_zapachow
