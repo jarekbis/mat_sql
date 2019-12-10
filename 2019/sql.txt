@@ -28,6 +28,7 @@ INNER JOIN (SELECT rodzina_zapachow, MIN(cena) as c
 FROM perfumy
 GROUP BY rodzina_zapachow) AS A
 ON perfumy.rodzina_zapachow = a.rodzina_zapachow AND a.c = perfumy.cena;
+
 -- 6.3
 SELECT marki.nazwa_m
 FROM perfumy
@@ -52,6 +53,7 @@ INNER JOIN marki ON perfumy.id_marki = marki.id_marki
 GROUP BY marki.nazwa_m
 HAVING MAX( IIF (sklad.nazwa_skladnika LIKE "*paczula*",1,0)) = 0
 ORDER BY marki.nazwa_m;
+
 -- 6.4
 SELECT perfumy.nazwa_p, printf("%.2f", 0.85 * perfumy.cena) obn_cena FROM perfumy
 JOIN marki ON perfumy.id_marki = marki.id_marki
@@ -78,3 +80,11 @@ FROM perfumy p
 JOIN marki m USING(id_marki)
 GROUP BY m.nazwa_m
 HAVING COUNT(DISTINCT p.rodzina_zapachow) = 1 ;
+-- MS ACCESS
+SELECT DISTINCT nazwa_m, rodzina_zapachow 
+FROM ((
+      SELECT id_marki as nr FROM (
+              SELECT DISTINCT id_marki, rodzina_zapachow as zapachy FROM perfumy) 
+      GROUP BY id_marki HAVING count(zapachy)=1) AS a
+    INNER JOIN marki ON marki.id_marki=a.nr )
+INNER JOIN perfumy ON perfumy.id_marki=marki.id_marki;
