@@ -62,4 +62,4 @@ SELECT COUNT()
 FROM (SELECT DISTINCT m.id_pok, w.tytul from wypozyczenia w LEFT JOIN meldunek m USING(pesel));
 -- MS ACCESS
 SELECT COUNT(*) as wypozyczenia
-FROM (SELECT DISTINCT meldunek.id_pok, wypozyczenia.tytul FROM wypozyczenia LEFT JOIN meldunek ON Meldunek.pesel = Wypozyczenia.pesel OR meldunek.id_pok is NULL);
+FROM (SELECT DISTINCT meldunek.id_pok, wypozyczenia.tytul FROM wypozyczenia LEFT JOIN meldunek ON Meldunek.pesel = Wypozyczenia.pesel;
