@@ -25,20 +25,48 @@ FROM (SELECT strftime("%Y",data_meczu) as rok, count(*) as mecze
  JOIN druzyny d USING(id_druzyny) 
  WHERE d.miasto='Kucykowo' 
  GROUP BY rok);
-
+-- MS ACCESS
+-- 5.1a
+SELECT rodzaj_meczu, count(*) 
+FROM wyniki 
+INNER JOIN druzyny ON wyniki.id_druzyny = druzyny.id_druzyny
+WHERE druzyny.miasto='Kucykowo' 
+GROUP BY rodzaj_meczu;
+-- 5.1b
+SELECT TOP 1 FORMAT(data_meczu,"YYYY") as rok, count(*) as [liczba meczy]
+FROM wyniki
+INNER JOIN druzyny ON druzyny.id_druzyny=wyniki.id_druzyny
+WHERE druzyny.miasto='Kucykowo' 
+GROUP BY FORMAT(data_meczu,"YYYY")
+ORDER BY count(*) DESC;
 -- 5.2
 SELECT d.nazwa 
 FROM wyniki w 
 JOIN druzyny d USING(id_druzyny) 
 GROUP BY id_druzyny 
 HAVING SUM(bramki_zdobyte) = SUM(bramki_stracone);
-
+-- MS ACCESS
+SELECT druzyny.nazwa
+FROM wyniki
+INNER JOIN druzyny ON wyniki.id_druzyny = druzyny.id_druzyny
+GROUP BY druzyny.nazwa
+HAVING SUM(bramki_zdobyte) = SUM(bramki_stracone);
 -- 5.3
 SELECT (CASE WHEN bramki_zdobyte > bramki_stracone THEN "W" 
              WHEN bramki_zdobyte < bramki_stracone THEN "P" 
              ELSE "R" END) as wynik, 
        count(*) 
 FROM wyniki 
+WHERE gdzie="W"
+GROUP BY wynik ;
+-- MS ACCESS
+SELECT wynik,count(*) 
+FROM (SELECT SWITCH(
+        bramki_zdobyte > bramki_stracone,"W",
+        bramki_zdobyte < bramki_stracone , "P" , 
+        bramki_zdobyte = bramki_stracone,"R") as wynik 
+  FROM wyniki 
+  WHERE gdzie="W") 
 GROUP BY wynik ;
 
 -- 5.4
@@ -46,3 +74,8 @@ SELECT count(*)
 FROM sedziowie s 
 LEFT JOIN (SELECT nr_licencji FROM wyniki WHERE rodzaj_meczu='P' ) w USING(nr_licencji) 
 WHERE w.nr_licencji IS NULL;
+-- MS ACCESS
+SELECT count(*) as [Liczba sedziow]
+FROM sedziowie
+LEFT JOIN (SELECT nr_licencji FROM wyniki WHERE rodzaj_meczu='P' ) as W ON sedziowie.nr_licencji=W.nr_licencji
+WHERE W.nr_licencji IS NULL;
