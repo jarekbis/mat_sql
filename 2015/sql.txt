@@ -13,10 +13,16 @@ FROM (SELECT s.rok, s.grandprix, sum(n.punkty) AS ile
   JOIN wyscigi s USING(id_wyscigu) 
   where k.nazwisko = 'Kubica' AND k.imie = 'Robert' 
   GROUP BY s.rok, s.grandprix);
+--MS Access
+
 
 --6.2
 SELECT grandprix, min(ile) 
 FROM (SELECT grandprix, count(*) AS ile FROM wyscigi GROUP BY grandprix);
+--MS Access
+SELECT TOP 1 grandprix, count(*) 
+FROM wyscigi GROUP BY grandprix
+ORDER BY 2;
 
 --6.3
 SELECT nazwisko, imie, MAX(ile), rok 
@@ -27,6 +33,31 @@ FROM (SELECT k.nazwisko, k.imie, SUM(n.punkty) as ile, rok
         WHERE rok IN (2000,2006,2012)
         GROUP BY rok,k.nazwisko,k.imie) 
 GROUP BY rok;
+--MS Access
+-- czy daloby sie wyswietlic dane bez dwukrotnego tworzenia podzapytania w1 i w2?
+SELECT kierowcy.imie, kierowcy.nazwisko, w1.* 
+FROM (
+   SELECT MAX(ile) as ilepkt, rok
+   FROM (
+      SELECT SUM(wyniki.punkty) as ile, rok
+      FROM wyniki
+      INNER JOIN wyscigi ON wyniki.id_wyscigu=wyscigi.id_wyscigu
+      WHERE rok IN (2000,2006,2012)
+      GROUP BY rok,wyniki.id_kierowcy
+      )
+  GROUP BY rok
+  ) as W1
+  INNER JOIN (
+     SELECT  kierowcy.imie, kierowcy.nazwisko, ile, rok
+     FROM (
+       SELECT wyniki.id_kierowcy as wid, SUM(wyniki.punkty) as ile, rok
+       FROM wyniki
+       INNER JOIN wyscigi ON wyniki.id_wyscigu=wyscigi.id_wyscigu
+       WHERE rok IN (2000,2006,2012)
+       GROUP BY rok,wyniki.id_kierowcy) as WW
+       INNER JOIN kierowcy ON WW.wid = kierowcy.id_kierowcy
+  ) as W2 
+ON w1.ilepkt=w2.ile AND w1.rok = w2.rok ;
 
 --6.4
 SELECT kraj, COUNT(*) 
@@ -35,4 +66,14 @@ FROM (SELECT DISTINCT k.nazwisko, k.imie, k.kraj
       JOIN kierowcy k USING(id_kierowcy) 
       JOIN wyscigi s USING(id_wyscigu) 
       WHERE rok = 2012 AND n.punkty > 0)
+GROUP BY kraj;
+-- MS Access
+SELECT kraj, COUNT(*)
+FROM (
+   SELECT DISTINCT kierowcy.nazwisko, kierowcy.imie, kierowcy.kraj
+   FROM (wyniki
+   INNER JOIN kierowcy ON wyniki.id_kierowcy = kierowcy.id_kierowcy)
+   INNER JOIN wyscigi ON wyniki.id_wyscigu = wyscigi.id_wyscigu
+   WHERE rok = 2012 AND wyniki.punkty > 0
+   )
 GROUP BY kraj;
