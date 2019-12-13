@@ -14,7 +14,16 @@ FROM (SELECT s.rok, s.grandprix, sum(n.punkty) AS ile
   where k.nazwisko = 'Kubica' AND k.imie = 'Robert' 
   GROUP BY s.rok, s.grandprix);
 --MS Access
-
+SELECT TOP 1 rok, grandprix
+FROM (
+    SELECT wyscigi.rok, wyscigi.grandprix, sum(wyniki.punkty) AS ile 
+    FROM (wyniki 
+         INNER JOIN kierowcy ON kierowcy.id_kierowcy = wyniki.id_kierowcy
+         ) INNER JOIN wyscigi ON wyscigi.id_wyscigu = wyniki.id_wyscigu 
+         WHERE kierowcy.nazwisko = 'Kubica' AND kierowcy.imie = 'Robert' 
+         GROUP BY wyscigi.rok, wyscigi.grandprix
+)
+ORDER BY ile DESC;
 
 --6.2
 SELECT grandprix, min(ile) 
