@@ -1,9 +1,9 @@
-sqlite> .cd 2015
-sqlite> .mode csv
-sqlite> .separator ";"
-sqlite> .import Kierowcy.txt kierowcy
-sqlite> .import Wyniki.txt wyniki
-sqlite> .import Wyscigi.txt wyscigi
+.cd 2015
+.mode csv
+.separator ";"
+.import Kierowcy.txt kierowcy
+.import Wyniki.txt wyniki
+.import Wyscigi.txt wyscigi
 
 --6.1
 SELECT rok, grandprix, MAX(ile) 

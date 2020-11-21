@@ -1,9 +1,9 @@
-sqlite> .cd 2016
-sqlite> .mode csv
-sqlite> .separator "\t"
-sqlite> .import meldunek.txt meldunek
-sqlite> .import studenci.txt studenci
-sqlite> .import wypozyczenia.txt wypozyczenia
+.cd 2016
+.mode csv
+.separator "\t"
+.import meldunek.txt meldunek
+.import studenci.txt studenci
+.import wypozyczenia.txt wypozyczenia
 
 -- 5.1 a
 SELECT s.imie, s.nazwisko, max(w.ile) 

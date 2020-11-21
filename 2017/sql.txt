@@ -1,8 +1,8 @@
-sqlite> .mode csv
-sqlite> .separator "\t"
-sqlite> .import wyniki.txt wyniki
-sqlite> .import sedziowie.txt sedziowie
-sqlite> .import druzyny.txt druzyny
+.mode csv
+.separator "\t"
+.import wyniki.txt wyniki
+.import sedziowie.txt sedziowie
+.import druzyny.txt druzyny
 
 -- 5.1a
 SELECT rodzaj_meczu, count(*) 
