@@ -1,8 +1,8 @@
-sqlite> .mode csv
-sqlite> .separator "\t"
-sqlite> .import naprawy.txt naprawy
-sqlite> .import komputery.txt komputery
-sqlite> .import awarie.txt awarie
+.mode csv
+.separator "\t"
+.import naprawy.txt naprawy
+.import komputery.txt komputery
+.import awarie.txt awarie
 
 -- 6.1
 -- SQLITE
