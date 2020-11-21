@@ -1,2 +1,2 @@
-language = "bash"
+language = "sqlite"
 run = "sqlite3"
