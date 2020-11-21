@@ -1,8 +1,8 @@
-sqlite> .mode csv
-sqlite> .separator "\t"
-sqlite> .import perfumy.txt perfumy
-sqlite> .import sklad.txt sklad
-sqlite> .import marki.txt marki
+.mode csv
+.separator "\t"
+.import perfumy.txt perfumy
+.import sklad.txt sklad
+.import marki.txt marki
 
 -- 6.1 
 SELECT perfumy.nazwa_p FROM perfumy
